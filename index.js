@@ -20,6 +20,18 @@ app.get("/clientes", async (req,res) => {
     res.json(listaClientes);
 });
 
+// /clientes/5
+app.get("/clientes/:id", async (req,res) => {
+    //SELECT * FROM clientes where id = 5;
+    const cliente = await Cliente.findOne({ where: { id: req.params.id } });
+
+    if(cliente){
+        res.json(cliente);
+    } else {
+        res.status(404).json({message: "Usuário não encontrado." })
+    }
+});
+
 app.post("/clientes", async (req, res) => {
     // Coletar os dados do req.body
     const { nome, email, telefone, endereco } = req.body;

@@ -49,10 +49,52 @@ app.post("/clientes", async (req, res) => {
     }
   });
 
+  app.put("/clientes/:id" , async (req,res) => {
+    //obter dados do corpo da requisição
+    const {nome, email, telefone, endereco} = req.body;
+    //obter identificação do cliente pelos parametros da rota
+    const {id} = req.params;
+    try{
+      //buscar cliente pelo id passado
+      const cliente = await Cliente.findOne({where: {id}});
+      //validar a existência desse cliente no banco de dados
+      if(cliente){
+        //validar a existencia desse do endereço passado no corpo da requisição
+        await Endereco.update(endereco, {where: {clienteId: id}});
+      } else{
+        res.status(404).json({message: "cliente não encontrado"});
+      }
+    }
+    catch(err){
+      res.status(500).json({message: "Um erro aconteceu"})
+    }
+
+  });
+
+  //Ecluir cliente
+app.delete("/clientes/:id", async (req,res) => {
+  //obter identificação do cliente pela rota
+  const {id} = req.params;
+  //buscar cliente pelo id
+  const cliente = await Cliente.findOne({where: {id}});
+  try{
+  if(cliente){
+    await cliente.destroy();
+    res.status(200).json({message:"Cliente removido"})
+  } else{
+    res.status(404).json({message: "cliente não encontrado"});
+  }
+  }
+  catch(err){
+    console.log(err);
+    res.status(500).json({message: "Um erro aconteceu"})
+  }
+});
+
 //Escuta de eventos(listen)
 app.listen(5000, () => {
     //gerar as tabelas a partir do model
     //Force = apaga tudo e recria as tabelas
     connection.sync({force:true});
 console.log("Servidor rodando em http://localhost:3000");
-})
+});
